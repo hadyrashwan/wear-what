@@ -33,6 +33,7 @@ def get_ai_clothing_suggestion(weather_data):
     Wind Speed: {weather_data['wind']['speed']} m/s
 
     Suggest appropriate clothing to wear, including top, bottom, and any necessary accessories.
+    Make sure to stick to hugging faces free response size limit.
     """
 
     # Using Mistral 7B Instruct model via Hugging Face
