@@ -1,18 +1,33 @@
 import streamlit as st
 import requests
 import datetime
+import os
 from huggingface_hub import InferenceClient
+from sentence_transformers import SentenceTransformer
+from supabase import create_client, Client
 from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
 
 # Get API keys from environment variables
-WEATHER_API_KEY = st.secrets["OPENWEATHERMAP_API_KEY"]
-HF_API_KEY = st.secrets["HUGGINGFACE_API_KEY"]
+WEATHER_API_KEY = os.getenv("OPENWEATHERMAP_API_KEY")
+HF_API_KEY = os.getenv("HUGGINGFACE_API_KEY",)
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_KEY =  os.getenv("SUPABASE_KEY")
+
+# WEATHER_API_KEY = os.getenv("OPENWEATHERMAP_API_KEY",st.secrets["OPENWEATHERMAP_API_KEY"])
+# HF_API_KEY = os.getenv("HUGGINGFACE_API_KEY",st.secrets["HUGGINGFACE_API_KEY"])
+# SUPABASE_URL = os.getenv("SUPABASE_URL",st.secrets["SUPABASE_URL"])
+# SUPABASE_KEY =  os.getenv("SUPABASE_KEY",st.secrets["SUPABASE_KEY"])
 
 # Initialize the Hugging Face Inference Client
 client = InferenceClient(token=HF_API_KEY)
+
+# Initialize Supabase
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+model = SentenceTransformer('all-MiniLM-L6-v2')
 
 def get_weather(city):
     base_url = "http://api.openweathermap.org/data/2.5/weather"
@@ -48,6 +63,22 @@ def get_ai_clothing_suggestion(weather_data):
 
     return response
 
+def get_relevant_quote(weather_condition):
+    # Encode the weather condition
+    weather_embedding = model.encode(weather_condition).tolist()
+
+    response =  supabase.rpc("match_quote_embeddings",{
+            'query_embedding': weather_embedding,
+            'match_threshold': 0.5,
+            'match_count': 1
+    }).execute()
+
+
+    if response.data and len(response.data) > 0:
+        return response.data[0]['content']
+    else:
+        return "No relevant quote found."
+
 st.title("AI-Powered Weather and Clothing Suggestion App")
 
 city = st.text_input("Enter a city name:", "London")
@@ -72,6 +103,10 @@ if st.button("Get Weather and Clothing Suggestion"):
             clothing_suggestion = get_ai_clothing_suggestion(weather_data)
         st.subheader("What to Wear (AI Suggestion):")
         st.write(clothing_suggestion)
+        with st.spinner("Finding a relevant quote..."):
+            quote = get_relevant_quote(f"{main_weather} {description}")
+        st.subheader("Quote of the Day:")
+        st.write(quote)
     else:
         st.error("City not found. Please check the spelling and try again.")
 
