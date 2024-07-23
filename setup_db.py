@@ -14,7 +14,7 @@ supabase_key = os.getenv("SUPABASE_KEY")
 supabase: Client = create_client(supabase_url, supabase_key)
 
 # Initialize SentenceTransformer
-model = SentenceTransformer('all-MiniLM-L6-v2')
+model = SentenceTransformer('thenlper/gte-small')
 
 def process_text_file(file_path: str):
     # Read the file
