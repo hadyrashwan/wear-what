@@ -6,6 +6,10 @@ from huggingface_hub import InferenceClient
 from sentence_transformers import SentenceTransformer
 from supabase import create_client, Client
 from dotenv import load_dotenv
+import base64
+from io import BytesIO
+from PIL import Image
+
 
 # Load environment variables
 load_dotenv()
@@ -27,7 +31,21 @@ client = InferenceClient(token=HF_API_KEY)
 # Initialize Supabase
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-model = SentenceTransformer('all-MiniLM-L6-v2')
+model = SentenceTransformer('thenlper/gte-small')
+
+def generate_outfit_image(clothing_suggestion):
+    prompt = f"A fashion illustration showing an outfit with {clothing_suggestion}. Stylized, colorful, no text."
+    
+    # Generate image using Stable Diffusion via Hugging Face
+    image_bytes = client.text_to_image(
+        prompt,
+        model="stabilityai/stable-diffusion-2-1",
+        negative_prompt="blurry, low quality, text, words, labels",
+    )
+    
+   # Convert bytes to PIL Image
+    image = Image.open(BytesIO(image_bytes))
+    return image
 
 def get_weather(city):
     base_url = "http://api.openweathermap.org/data/2.5/weather"
@@ -47,7 +65,31 @@ def get_ai_clothing_suggestion(weather_data):
     Humidity: {weather_data['main']['humidity']}%
     Wind Speed: {weather_data['wind']['speed']} m/s
 
-    Suggest appropriate clothing to wear, including top, bottom, and any necessary accessories.
+    Suggest appropriate clothing to wear, including top, bottom.
+    Make sure to stick to hugging faces free response size limit.
+    """
+
+    # Using Mistral 7B Instruct model via Hugging Face
+    response = client.text_generation(
+        prompt,
+        model="mistralai/Mistral-7B-Instruct-v0.1",
+        max_new_tokens=150,
+        temperature=0.7,
+        top_k=50,
+        top_p=0.95,
+    )
+
+    return response
+
+def get_ai_weather_explanation(weather_data):
+    prompt = f"""
+    Given the following weather conditions:
+    Temperature: {weather_data['main']['temp']}°C
+    Weather: {weather_data['weather'][0]['main']} ({weather_data['weather'][0]['description']})
+    Humidity: {weather_data['main']['humidity']}%
+    Wind Speed: {weather_data['wind']['speed']} m/s
+
+    Give me the description of the weather.
     Make sure to stick to hugging faces free response size limit.
     """
 
@@ -70,7 +112,7 @@ def get_relevant_quote(weather_condition):
     response =  supabase.rpc("match_quote_embeddings",{
             'query_embedding': weather_embedding,
             'match_threshold': 0.5,
-            'match_count': 1
+            'match_count': 5
     }).execute()
 
 
@@ -104,11 +146,20 @@ if st.button("Get Weather and Clothing Suggestion"):
         st.subheader("What to Wear (AI Suggestion):")
         st.write(clothing_suggestion)
         with st.spinner("Finding a relevant quote..."):
-            quote = get_relevant_quote(f"{main_weather} {description}")
+            weather_description = get_ai_weather_explanation(weather_data)
+            quote = get_relevant_quote(f"{weather_description}")
+
         st.subheader("Quote of the Day:")
         st.write(quote)
+        st.subheader("Weather description:")
+        st.write(weather_description)
     else:
         st.error("City not found. Please check the spelling and try again.")
+
+    with st.spinner("Generating outfit image..."):
+        outfit_image = generate_outfit_image(clothing_suggestion)
+    st.subheader("Outfit Visualization:")
+    st.image(outfit_image, caption="AI-generated outfit based on the suggestion")
 
 # Display current date and time
 st.sidebar.write(f"Current Date and Time: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
