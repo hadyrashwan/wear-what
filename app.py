@@ -43,9 +43,9 @@ def generate_outfit_image(clothing_suggestion):
         negative_prompt="blurry, low quality, text, words, labels",
     )
     
-   # Convert bytes to PIL Image
-    image = Image.open(BytesIO(image_bytes))
-    return image
+#    # Convert bytes to PIL Image
+#     image = Image.open(BytesIO(image_bytes))
+    return image_bytes
 
 def get_weather(city):
     base_url = "http://api.openweathermap.org/data/2.5/weather"
@@ -73,10 +73,10 @@ def get_ai_clothing_suggestion(weather_data):
     response = client.text_generation(
         prompt,
         model="mistralai/Mistral-7B-Instruct-v0.1",
-        max_new_tokens=150,
+        # max_new_tokens=150,
         temperature=0.7,
-        top_k=50,
-        top_p=0.95,
+        # top_k=50,
+        # top_p=0.95,
     )
 
     return response
