@@ -82,6 +82,32 @@ Output:
 }
 ```
 
+### Example Python Code
+
+Here's an example of how to call the model using Python and the `requests` library:
+
+```python
+import requests
+
+API_URL = "https://api-inference.huggingface.co/models/YOUR_USERNAME/YOUR_REPO_NAME"
+headers = {"Authorization": f"Bearer YOUR_HUGGINGFACE_API_TOKEN"}
+
+def query(payload):
+    response = requests.post(API_URL, headers=headers, json=payload)
+    return response.json()
+
+weather_data = {
+    "temperature": 20,
+    "weather": "Sunny",
+    "description": "clear sky",
+    "humidity": 60,
+    "wind_speed": 5
+}
+
+output = query({"weather_data": weather_data})
+print(output)
+```
+
 ## Repository Structure
 
 - `app.py`: The main Streamlit application file
