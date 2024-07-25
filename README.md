@@ -10,6 +10,7 @@ pinned: true
 license: mit
 inference_file: weather_clothing_suggestion.py
 base_model: mistralai/Mistral-7B-Instruct-v0.1
+pipeline_tag: text-generation
 inference: true
 ---
 # AI Weather and Clothing Suggestion App
