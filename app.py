@@ -6,9 +6,6 @@ from huggingface_hub import InferenceClient
 from sentence_transformers import SentenceTransformer
 from supabase import create_client, Client
 from dotenv import load_dotenv
-import base64
-from io import BytesIO
-from PIL import Image
 
 
 # Load environment variables
@@ -19,11 +16,6 @@ WEATHER_API_KEY = os.getenv("OPENWEATHERMAP_API_KEY")
 HF_API_KEY = os.getenv("HUGGINGFACE_API_KEY",)
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY =  os.getenv("SUPABASE_KEY")
-
-# WEATHER_API_KEY = os.getenv("OPENWEATHERMAP_API_KEY",st.secrets["OPENWEATHERMAP_API_KEY"])
-# HF_API_KEY = os.getenv("HUGGINGFACE_API_KEY",st.secrets["HUGGINGFACE_API_KEY"])
-# SUPABASE_URL = os.getenv("SUPABASE_URL",st.secrets["SUPABASE_URL"])
-# SUPABASE_KEY =  os.getenv("SUPABASE_KEY",st.secrets["SUPABASE_KEY"])
 
 # Initialize the Hugging Face Inference Client
 client = InferenceClient(token=HF_API_KEY)
