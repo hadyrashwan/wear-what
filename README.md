@@ -8,6 +8,8 @@ sdk_version: 1.24.0
 app_file: app.py
 pinned: true
 license: mit
+inference_file: weather_clothing_suggestion.py
+inference: true
 ---
 
 # AI Weather and Clothing Suggestion App
