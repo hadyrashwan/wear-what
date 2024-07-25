@@ -89,7 +89,7 @@ Here's an example of how to call the model using Python and the `requests` libra
 ```python
 import requests
 
-API_URL = "https://api-inference.huggingface.co/models/YOUR_USERNAME/YOUR_REPO_NAME"
+API_URL = "https://api-inference.huggingface.co/models/hadirashwan/wear_what_clothing_suggestion"
 headers = {"Authorization": f"Bearer YOUR_HUGGINGFACE_API_TOKEN"}
 
 def query(payload):
