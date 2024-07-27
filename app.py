@@ -2,7 +2,6 @@ import streamlit as st
 import requests
 import datetime
 import os
-from huggingface_hub import InferenceClient
 from sentence_transformers import SentenceTransformer
 from supabase import create_client, Client
 from dotenv import load_dotenv
@@ -18,26 +17,50 @@ SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY =  os.getenv("SUPABASE_KEY")
 
 # Initialize the Hugging Face Inference Client
-client = InferenceClient(token=HF_API_KEY)
+
+llvm_model_url = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3/v1/chat/completions"
+
 
 # Initialize Supabase
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 model = SentenceTransformer('thenlper/gte-small')
 
+def call_llvm_model(prompt):
+    payload = {
+    "model": "mistralai/Mistral-7B-Instruct-v0.3",
+    "messages": [
+        {
+        "role": "user",
+        "content": prompt,
+        }
+    ],
+    "max_tokens": 500,
+    "stream": False
+    }
+    headers = {
+    "Authorization": f"Bearer {HF_API_KEY}",
+    "content-type": "application/json"
+    }
+
+    response = requests.post(llvm_model_url, json=payload, headers=headers)
+
+    response = response.json()
+    return response['choices'][0]['message']['content']
+
 def generate_outfit_image(clothing_suggestion):
     prompt = f"A fashion illustration showing an outfit with {clothing_suggestion}. Stylized, colorful, no text."
     
-    # Generate image using Stable Diffusion via Hugging Face
-    image_bytes = client.text_to_image(
-        prompt,
-        model="stabilityai/stable-diffusion-2-1",
-        negative_prompt="blurry, low quality, text, words, labels",
-    )
-    
-#    # Convert bytes to PIL Image
-#     image = Image.open(BytesIO(image_bytes))
-    return image_bytes
+    payload = {
+        "inputs": prompt,
+        "negative_prompt":"blurry, low quality, text, words, labels"
+    }
+
+    API_URL = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-2-1"
+    headers = {"Authorization": f"Bearer {HF_API_KEY}"}
+
+    response = requests.post(API_URL, headers=headers, json=payload)
+    return response.content
 
 def get_weather(city):
     base_url = "http://api.openweathermap.org/data/2.5/weather"
@@ -61,17 +84,7 @@ def get_ai_clothing_suggestion(weather_data):
     Make sure to stick to hugging faces free response size limit.
     """
 
-    # Using Mistral 7B Instruct model via Hugging Face
-    response = client.text_generation(
-        prompt,
-        model="mistralai/Mistral-7B-Instruct-v0.1",
-        # max_new_tokens=150,
-        temperature=0.7,
-        # top_k=50,
-        # top_p=0.95,
-    )
-
-    return response
+    return call_llvm_model(prompt)
 
 def get_ai_weather_explanation(weather_data):
     prompt = f"""
@@ -85,17 +98,7 @@ def get_ai_weather_explanation(weather_data):
     Make sure to stick to hugging faces free response size limit.
     """
 
-    # Using Mistral 7B Instruct model via Hugging Face
-    response = client.text_generation(
-        prompt,
-        model="mistralai/Mistral-7B-Instruct-v0.1",
-        max_new_tokens=150,
-        temperature=0.7,
-        top_k=50,
-        top_p=0.95,
-    )
-
-    return response
+    return call_llvm_model(prompt)
 
 def get_relevant_quote(weather_condition):
     # Encode the weather condition
