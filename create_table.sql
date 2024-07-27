@@ -5,5 +5,5 @@ CREATE TABLE public.quote_embeddings (
     chunk_id TEXT,
     quote_number TEXT,
     quote_text TEXT,
-    embedding VECTOR(384)
+    embedding VECTOR(1024)
 );

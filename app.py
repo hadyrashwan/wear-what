@@ -18,7 +18,6 @@ SUPABASE_KEY =  os.getenv("SUPABASE_KEY")
 
 # Initialize the Hugging Face Inference Client
 
-llvm_model_url = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3/v1/chat/completions"
 
 
 # Initialize Supabase
@@ -27,6 +26,7 @@ supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 model = SentenceTransformer('thenlper/gte-small')
 
 def call_llvm_model(prompt):
+    llvm_model_url = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3/v1/chat/completions"
     payload = {
     "model": "mistralai/Mistral-7B-Instruct-v0.3",
     "messages": [
@@ -101,8 +101,18 @@ def get_ai_weather_explanation(weather_data):
     return call_llvm_model(prompt)
 
 def get_relevant_quote(weather_condition):
-    # Encode the weather condition
-    weather_embedding = model.encode(weather_condition).tolist()
+
+    url = "https://api-inference.huggingface.co/models/mixedbread-ai/mxbai-embed-large-v1"
+
+    payload = { "inputs": weather_condition}
+    headers = {
+    "content-type": "application/json",
+    "Authorization": f"Bearer {HF_API_KEY}"
+    }
+
+    response = requests.post(url, json=payload, headers=headers)
+
+    weather_embedding = response.json()
 
     response =  supabase.rpc("match_quote_embeddings",{
             'query_embedding': weather_embedding,

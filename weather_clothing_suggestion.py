@@ -1,9 +1,30 @@
-from transformers import AutoTokenizer, AutoModelForCausalLM
+import requests
+import os
+HF_API_KEY = os.getenv("HUGGINGFACE_API_KEY",)
 
-# Load model and tokenizer
-model_name = "mistralai/Mistral-7B-Instruct-v0.1"
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-model = AutoModelForCausalLM.from_pretrained(model_name)
+def call_llvm_model(prompt):
+    llvm_model_url = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3/v1/chat/completions"
+    payload = {
+    "model": "mistralai/Mistral-7B-Instruct-v0.3",
+    "messages": [
+        {
+        "role": "user",
+        "content": prompt,
+        }
+    ],
+    "max_tokens": 500,
+    "stream": False
+    }
+    headers = {
+    "Authorization": f"Bearer {HF_API_KEY}",
+    "content-type": "application/json"
+    }
+
+    response = requests.post(llvm_model_url, json=payload, headers=headers)
+
+    response = response.json()
+    return response['choices'][0]['message']['content']
+
 
 def generate_clothing_suggestion(weather_data):
     prompt = f"""
@@ -16,11 +37,7 @@ def generate_clothing_suggestion(weather_data):
     Suggest appropriate clothing to wear, including top and bottom.
     """
 
-    inputs = tokenizer(prompt, return_tensors="pt")
-    outputs = model.generate(**inputs, max_new_tokens=150, temperature=0.7, top_k=50, top_p=0.95)
-    suggestion = tokenizer.decode(outputs[0], skip_special_tokens=True)
-
-    return suggestion.split(prompt)[-1].strip()
+    return call_llvm_model(prompt)
 
 def inference(weather_data):
     try:

@@ -2,7 +2,6 @@ import os
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from sentence_transformers import SentenceTransformer
 from supabase import create_client, Client
-from postgrest.exceptions import APIError
 
 # Load environment variables
 from dotenv import load_dotenv
@@ -14,7 +13,7 @@ supabase_key = os.getenv("SUPABASE_KEY")
 supabase: Client = create_client(supabase_url, supabase_key)
 
 # Initialize SentenceTransformer
-model = SentenceTransformer('thenlper/gte-small')
+model = SentenceTransformer('mixedbread-ai/mxbai-embed-large-v1')
 
 def process_text_file(file_path: str):
     # Read the file
