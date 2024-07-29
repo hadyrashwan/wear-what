@@ -2,7 +2,7 @@ import { load } from "https://deno.land/std/dotenv/mod.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.7";
 
 // Load environment variables
-const env = await load();
+const env = await load({allowEmptyValues:true});
 
 // Get API keys from environment variables
 const WEATHER_API_KEY = env["OPENWEATHERMAP_API_KEY"];
