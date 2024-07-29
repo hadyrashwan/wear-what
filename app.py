@@ -2,7 +2,6 @@ import streamlit as st
 import requests
 import datetime
 import os
-from sentence_transformers import SentenceTransformer
 from supabase import create_client, Client
 from dotenv import load_dotenv
 
@@ -23,7 +22,6 @@ SUPABASE_KEY =  os.getenv("SUPABASE_KEY")
 # Initialize Supabase
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-model = SentenceTransformer('thenlper/gte-small')
 
 def call_llvm_model(prompt):
     llvm_model_url = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3/v1/chat/completions"
