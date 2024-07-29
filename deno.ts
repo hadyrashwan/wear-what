@@ -1,4 +1,4 @@
-import { load } from "https://deno.land/std/dotenv/mod.ts";
+// import { load } from "https://deno.land/std/dotenv/mod.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.7";
 
 // Load environment variables
@@ -9,6 +9,9 @@ const WEATHER_API_KEY = Deno.env.get("OPENWEATHERMAP_API_KEY");
 const HF_API_KEY = Deno.env.get("HUGGINGFACE_API_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const SUPABASE_KEY = Deno.env.get("SUPABASE_KEY");
+
+console.log(Deno.env.get("SUPABASE_URL"));  // outputs "undefined"
+
 
 // Initialize Supabase
 const supabase = createClient(SUPABASE_URL!, SUPABASE_KEY!);
