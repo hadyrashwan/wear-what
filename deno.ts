@@ -1,14 +1,14 @@
-// import { load } from "https://deno.land/std/dotenv/mod.ts";
+import { load } from "https://deno.land/std/dotenv/mod.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.7";
 
 // Load environment variables
 // const env = await load({allowEmptyValues:true});
 
 // Get API keys from environment variables
-const WEATHER_API_KEY = env["OPENWEATHERMAP_API_KEY"];
-const HF_API_KEY = env["HUGGINGFACE_API_KEY"];
-const SUPABASE_URL = env["SUPABASE_URL"];
-const SUPABASE_KEY = env["SUPABASE_KEY"];
+const WEATHER_API_KEY = Deno.env.get("OPENWEATHERMAP_API_KEY");
+const HF_API_KEY = Deno.env.get("HUGGINGFACE_API_KEY");
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+const SUPABASE_KEY = Deno.env.get("SUPABASE_KEY");
 
 // Initialize Supabase
 const supabase = createClient(SUPABASE_URL!, SUPABASE_KEY!);
