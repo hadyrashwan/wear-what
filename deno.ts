@@ -10,7 +10,7 @@ const HF_API_KEY = Deno.env.get("HUGGINGFACE_API_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const SUPABASE_KEY = Deno.env.get("SUPABASE_KEY");
 
-console.log(Deno.env.get("SUPABASE_URL"));  // outputs "undefined"
+// console.log(Deno.env.get("SUPABASE_URL"));  // outputs "undefined"
 
 
 // Initialize Supabase
